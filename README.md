@@ -4,6 +4,7 @@
 
 ## Q3
 ### 2way
+system.l3.overall_miss_rate::total           0.854878
 ```
     assoc = 2
     tag_latency = 20
