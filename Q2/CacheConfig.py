@@ -66,7 +66,8 @@ def config_cache(options, system):
             O3_ARM_v7a_DCache, O3_ARM_v7a_ICache, O3_ARM_v7aL2, \
             O3_ARM_v7aWalkCache
     else:
-        dcache_class, icache_class, l2_cache_class,l3_cache_class, walk_cache_class = \
+        dcache_class, icache_class, l2_cache_class, l3_cache_class, \
+         walk_cache_class = \
             L1_DCache, L1_ICache, L2Cache, L3Cache, None
 
         if buildEnv['TARGET_ISA'] == 'x86':
@@ -94,11 +95,11 @@ def config_cache(options, system):
                                    assoc=options.l3_assoc)
 
         system.tol2bus = L2XBar(clk_domain = system.cpu_clk_domain)
-        system.tol3bus = L3XBar(clk_domain = system.cpu_clk_domain)
-        
+        system.tol3bus = CoherentXBar(clk_domain = system.cpu_clk_domain, forward_latency=4, response_latency=4, frontend_latency=1, snoop_response_latency=2, width=128)
+
         system.l2.cpu_side = system.tol2bus.master
-        system.l2.mem_side = system.membus.slave
-    
+        system.l2.mem_side = system.tol3bus.slave
+
         system.l3.cpu_side = system.tol3bus.master
         system.l3.mem_side = system.membus.slave
     elif options.l2cache:
@@ -110,10 +111,9 @@ def config_cache(options, system):
                                    assoc=options.l2_assoc)
 
         system.tol2bus = L2XBar(clk_domain = system.cpu_clk_domain)
-        
         system.l2.cpu_side = system.tol2bus.master
         system.l2.mem_side = system.membus.slave
-        
+
     if options.memchecker:
         system.memchecker = MemChecker()
 
