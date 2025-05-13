@@ -1,4 +1,4 @@
-# Copyright (c) 2012, 2015, 2017 ARM Limited
+# Copyright (c) 2012-2013, 2015-2017 ARM Limited
 # All rights reserved.
 #
 # The license below extends only to copyright in the software and shall
@@ -11,6 +11,7 @@
 # modified or unmodified, in source code or in binary form.
 #
 # Copyright (c) 2005-2008 The Regents of The University of Michigan
+# Copyright (c) 2011 Regents of the University of California
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -37,176 +38,348 @@
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #
 # Authors: Nathan Binkert
+#          Rick Strong
 #          Andreas Hansson
+#          Glenn Bergmans
 
-from MemObject import MemObject
-from System import System
+from __future__ import print_function
+
+import sys
+
+from m5.SimObject import *
+from m5.defines import buildEnv
 from m5.params import *
 from m5.proxy import *
-from m5.SimObject import SimObject
+from m5.util.fdthelper import *
 
-class BaseXBar(MemObject):
-    type = 'BaseXBar'
+from XBar import L2XBar, L3XBar
+from InstTracer import InstTracer
+from CPUTracers import ExeTracer
+from MemObject import MemObject
+from SubSystem import SubSystem
+from ClockDomain import *
+from Platform import Platform
+
+default_tracer = ExeTracer()
+
+if buildEnv['TARGET_ISA'] == 'alpha':
+    from AlphaTLB import AlphaDTB as ArchDTB, AlphaITB as ArchITB
+    from AlphaInterrupts import AlphaInterrupts
+    from AlphaISA import AlphaISA
+    default_isa_class = AlphaISA
+elif buildEnv['TARGET_ISA'] == 'sparc':
+    from SparcTLB import SparcTLB as ArchDTB, SparcTLB as ArchITB
+    from SparcInterrupts import SparcInterrupts
+    from SparcISA import SparcISA
+    default_isa_class = SparcISA
+elif buildEnv['TARGET_ISA'] == 'x86':
+    from X86TLB import X86TLB as ArchDTB, X86TLB as ArchITB
+    from X86LocalApic import X86LocalApic
+    from X86ISA import X86ISA
+    default_isa_class = X86ISA
+elif buildEnv['TARGET_ISA'] == 'mips':
+    from MipsTLB import MipsTLB as ArchDTB, MipsTLB as ArchITB
+    from MipsInterrupts import MipsInterrupts
+    from MipsISA import MipsISA
+    default_isa_class = MipsISA
+elif buildEnv['TARGET_ISA'] == 'arm':
+    from ArmTLB import ArmTLB as ArchDTB, ArmTLB as ArchITB
+    from ArmTLB import ArmStage2IMMU, ArmStage2DMMU
+    from ArmInterrupts import ArmInterrupts
+    from ArmISA import ArmISA
+    default_isa_class = ArmISA
+elif buildEnv['TARGET_ISA'] == 'power':
+    from PowerTLB import PowerTLB as ArchDTB, PowerTLB as ArchITB
+    from PowerInterrupts import PowerInterrupts
+    from PowerISA import PowerISA
+    default_isa_class = PowerISA
+elif buildEnv['TARGET_ISA'] == 'riscv':
+    from RiscvTLB import RiscvTLB as ArchDTB, RiscvTLB as ArchITB
+    from RiscvInterrupts import RiscvInterrupts
+    from RiscvISA import RiscvISA
+    default_isa_class = RiscvISA
+
+class BaseCPU(MemObject):
+    type = 'BaseCPU'
     abstract = True
-    cxx_header = "mem/xbar.hh"
+    cxx_header = "cpu/base.hh"
 
-    slave = VectorSlavePort("Vector port for connecting masters")
-    master = VectorMasterPort("Vector port for connecting slaves")
+    cxx_exports = [
+        PyBindMethod("switchOut"),
+        PyBindMethod("takeOverFrom"),
+        PyBindMethod("switchedOut"),
+        PyBindMethod("flushTLBs"),
+        PyBindMethod("totalInsts"),
+        PyBindMethod("scheduleInstStop"),
+        PyBindMethod("scheduleLoadStop"),
+        PyBindMethod("getCurrentInstCount"),
+    ]
 
-    # Latencies governing the time taken for the variuos paths a
-    # packet has through the crossbar. Note that the crossbar itself
-    # does not add the latency due to assumptions in the coherency
-    # mechanism. Instead the latency is annotated on the packet and
-    # left to the neighbouring modules.
-    #
-    # A request incurs the frontend latency, possibly snoop filter
-    # lookup latency, and forward latency. A response incurs the
-    # response latency. Frontend latency encompasses arbitration and
-    # deciding what to do when a request arrives. the forward latency
-    # is the latency involved once a decision is made to forward the
-    # request. The response latency, is similar to the forward
-    # latency, but for responses rather than requests.
-    frontend_latency = Param.Cycles("Frontend latency")
-    forward_latency = Param.Cycles("Forward latency")
-    response_latency = Param.Cycles("Response latency")
+    @classmethod
+    def memory_mode(cls):
+        """Which memory mode does this CPU require?"""
+        return 'invalid'
 
-    # Width governing the throughput of the crossbar
-    width = Param.Unsigned("Datapath width per port (bytes)")
+    @classmethod
+    def require_caches(cls):
+        """Does the CPU model require caches?
 
-    # The default port can be left unconnected, or be used to connect
-    # a default slave port
-    default = MasterPort("Port for connecting an optional default slave")
+        Some CPU models might make assumptions that require them to
+        have caches.
+        """
+        return False
 
-    # The default port can be used unconditionally, or based on
-    # address range, in which case it may overlap with other
-    # ports. The default range is always checked first, thus creating
-    # a two-level hierarchical lookup. This is useful e.g. for the PCI
-    # xbar configuration.
-    use_default_range = Param.Bool(False, "Perform address mapping for " \
-                                       "the default port")
+    @classmethod
+    def support_take_over(cls):
+        """Does the CPU model support CPU takeOverFrom?"""
+        return False
 
-class NoncoherentXBar(BaseXBar):
-    type = 'NoncoherentXBar'
-    cxx_header = "mem/noncoherent_xbar.hh"
+    def takeOverFrom(self, old_cpu):
+        self._ccObject.takeOverFrom(old_cpu._ccObject)
 
-class CoherentXBar(BaseXBar):
-    type = 'CoherentXBar'
-    cxx_header = "mem/coherent_xbar.hh"
 
-    # The coherent crossbar additionally has snoop responses that are
-    # forwarded after a specific latency.
-    snoop_response_latency = Param.Cycles("Snoop response latency")
+    system = Param.System(Parent.any, "system object")
+    cpu_id = Param.Int(-1, "CPU identifier")
+    socket_id = Param.Unsigned(0, "Physical Socket identifier")
+    numThreads = Param.Unsigned(1, "number of HW thread contexts")
+    pwr_gating_latency = Param.Cycles(300,
+        "Latency to enter power gating state when all contexts are suspended")
 
-    # An optional snoop filter
-    snoop_filter = Param.SnoopFilter(NULL, "Selected snoop filter")
+    power_gating_on_idle = Param.Bool(False, "Control whether the core goes "\
+        "to the OFF power state after all thread are disabled for "\
+        "pwr_gating_latency cycles")
 
-    # Determine how this crossbar handles packets where caches have
-    # already committed to responding, by establishing if the crossbar
-    # is the point of coherency or not.
-    point_of_coherency = Param.Bool(False, "Consider this crossbar the " \
-                                    "point of coherency")
+    function_trace = Param.Bool(False, "Enable function trace")
+    function_trace_start = Param.Tick(0, "Tick to start function trace")
 
-    # Specify whether this crossbar is the point of unification.
-    point_of_unification = Param.Bool(False, "Consider this crossbar the " \
-                                      "point of unification")
+    checker = Param.BaseCPU(NULL, "checker CPU")
 
-    system = Param.System(Parent.any, "System that the crossbar belongs to.")
+    syscallRetryLatency = Param.Cycles(10000, "Cycles to wait until retry")
 
-class SnoopFilter(SimObject):
-    type = 'SnoopFilter'
-    cxx_header = "mem/snoop_filter.hh"
+    do_checkpoint_insts = Param.Bool(True,
+        "enable checkpoint pseudo instructions")
+    do_statistics_insts = Param.Bool(True,
+        "enable statistics pseudo instructions")
 
-    # Lookup latency of the snoop filter, added to requests that pass
-    # through a coherent crossbar.
-    lookup_latency = Param.Cycles(1, "Lookup latency")
+    profile = Param.Latency('0ns', "trace the kernel stack")
+    do_quiesce = Param.Bool(True, "enable quiesce instructions")
 
-    system = Param.System(Parent.any, "System that the crossbar belongs to.")
+    wait_for_remote_gdb = Param.Bool(False,
+        "Wait for a remote GDB connection");
 
-    # Sanity check on max capacity to track, adjust if needed.
-    max_capacity = Param.MemorySize('8MB', "Maximum capacity of snoop filter")
+    workload = VectorParam.Process([], "processes to run")
 
-# We use a coherent crossbar to connect multiple masters to the L2
-# caches. Normally this crossbar would be part of the cache itself.
-class L2XBar(CoherentXBar):
-    # 256-bit crossbar by default
-    width = 32
+    dtb = Param.BaseTLB(ArchDTB(), "Data TLB")
+    itb = Param.BaseTLB(ArchITB(), "Instruction TLB")
+    if buildEnv['TARGET_ISA'] == 'sparc':
+        interrupts = VectorParam.SparcInterrupts(
+                [], "Interrupt Controller")
+        isa = VectorParam.SparcISA([], "ISA instance")
+    elif buildEnv['TARGET_ISA'] == 'alpha':
+        interrupts = VectorParam.AlphaInterrupts(
+                [], "Interrupt Controller")
+        isa = VectorParam.AlphaISA([], "ISA instance")
+    elif buildEnv['TARGET_ISA'] == 'x86':
+        interrupts = VectorParam.X86LocalApic([], "Interrupt Controller")
+        isa = VectorParam.X86ISA([], "ISA instance")
+    elif buildEnv['TARGET_ISA'] == 'mips':
+        interrupts = VectorParam.MipsInterrupts(
+                [], "Interrupt Controller")
+        isa = VectorParam.MipsISA([], "ISA instance")
+    elif buildEnv['TARGET_ISA'] == 'arm':
+        istage2_mmu = Param.ArmStage2MMU(ArmStage2IMMU(), "Stage 2 trans")
+        dstage2_mmu = Param.ArmStage2MMU(ArmStage2DMMU(), "Stage 2 trans")
+        interrupts = VectorParam.ArmInterrupts(
+                [], "Interrupt Controller")
+        isa = VectorParam.ArmISA([], "ISA instance")
+    elif buildEnv['TARGET_ISA'] == 'power':
+        UnifiedTLB = Param.Bool(True, "Is this a Unified TLB?")
+        interrupts = VectorParam.PowerInterrupts(
+                [], "Interrupt Controller")
+        isa = VectorParam.PowerISA([], "ISA instance")
+    elif buildEnv['TARGET_ISA'] == 'riscv':
+        interrupts = VectorParam.RiscvInterrupts(
+                [], "Interrupt Controller")
+        isa = VectorParam.RiscvISA([], "ISA instance")
+    else:
+        print("Don't know what TLB to use for ISA %s" %
+              buildEnv['TARGET_ISA'])
+        sys.exit(1)
 
-    # Assume that most of this is covered by the cache latencies, with
-    # no more than a single pipeline stage for any packet.
-    frontend_latency = 1
-    forward_latency = 0
-    response_latency = 1
-    snoop_response_latency = 1
+    max_insts_all_threads = Param.Counter(0,
+        "terminate when all threads have reached this inst count")
+    max_insts_any_thread = Param.Counter(0,
+        "terminate when any thread reaches this inst count")
+    simpoint_start_insts = VectorParam.Counter([],
+        "starting instruction counts of simpoints")
+    max_loads_all_threads = Param.Counter(0,
+        "terminate when all threads have reached this load count")
+    max_loads_any_thread = Param.Counter(0,
+        "terminate when any thread reaches this load count")
+    progress_interval = Param.Frequency('0Hz',
+        "frequency to print out the progress message")
 
-    # Use a snoop-filter by default, and set the latency to zero as
-    # the lookup is assumed to overlap with the frontend latency of
-    # the crossbar
-    snoop_filter = SnoopFilter(lookup_latency = 0)
+    switched_out = Param.Bool(False,
+        "Leave the CPU switched out after startup (used when switching " \
+        "between CPU models)")
 
-    # This specialisation of the coherent crossbar is to be considered
-    # the point of unification, it connects the dcache and the icache
-    # to the first level of unified cache.
-    point_of_unification = True
-class L3XBar(CoherentXBar):
-    # 256-bit crossbar by default
-    width = 32
+    tracer = Param.InstTracer(default_tracer, "Instruction tracer")
 
-    # Assume that most of this is covered by the cache latencies, with
-    # no more than a single pipeline stage for any packet.
-    frontend_latency = 1
-    forward_latency = 0
-    response_latency = 1
-    snoop_response_latency = 1
+    icache_port = MasterPort("Instruction Port")
+    dcache_port = MasterPort("Data Port")
+    _cached_ports = ['icache_port', 'dcache_port']
 
-    # Use a snoop-filter by default, and set the latency to zero as
-    # the lookup is assumed to overlap with the frontend latency of
-    # the crossbar
-    snoop_filter = SnoopFilter(lookup_latency = 0)
+    if buildEnv['TARGET_ISA'] in ['x86', 'arm']:
+        _cached_ports += ["itb.walker.port", "dtb.walker.port"]
 
-    # This specialisation of the coherent crossbar is to be considered
-    # the point of unification, it connects the dcache and the icache
-    # to the first level of unified cache.
-    point_of_unification = True
+    _uncached_slave_ports = []
+    _uncached_master_ports = []
+    if buildEnv['TARGET_ISA'] == 'x86':
+        _uncached_slave_ports += ["interrupts[0].pio",
+                                  "interrupts[0].int_slave"]
+        _uncached_master_ports += ["interrupts[0].int_master"]
 
-# One of the key coherent crossbar instances is the system
-# interconnect, tying together the CPU clusters, GPUs, and any I/O
-# coherent masters, and DRAM controllers.
-class SystemXBar(CoherentXBar):
-    # 128-bit crossbar by default
-    width = 16
+    def createInterruptController(self):
+        if buildEnv['TARGET_ISA'] == 'sparc':
+            self.interrupts = [SparcInterrupts() for i in xrange(self.numThreads)]
+        elif buildEnv['TARGET_ISA'] == 'alpha':
+            self.interrupts = [AlphaInterrupts() for i in xrange(self.numThreads)]
+        elif buildEnv['TARGET_ISA'] == 'x86':
+            self.apic_clk_domain = DerivedClockDomain(clk_domain =
+                                                      Parent.clk_domain,
+                                                      clk_divider = 16)
+            self.interrupts = [X86LocalApic(clk_domain = self.apic_clk_domain,
+                                           pio_addr=0x2000000000000000)
+                               for i in xrange(self.numThreads)]
+            _localApic = self.interrupts
+        elif buildEnv['TARGET_ISA'] == 'mips':
+            self.interrupts = [MipsInterrupts() for i in xrange(self.numThreads)]
+        elif buildEnv['TARGET_ISA'] == 'arm':
+            self.interrupts = [ArmInterrupts() for i in xrange(self.numThreads)]
+        elif buildEnv['TARGET_ISA'] == 'power':
+            self.interrupts = [PowerInterrupts() for i in xrange(self.numThreads)]
+        elif buildEnv['TARGET_ISA'] == 'riscv':
+            self.interrupts = \
+                [RiscvInterrupts() for i in xrange(self.numThreads)]
+        else:
+            print("Don't know what Interrupt Controller to use for ISA %s" %
+                  buildEnv['TARGET_ISA'])
+            sys.exit(1)
 
-    # A handful pipeline stages for each portion of the latency
-    # contributions.
-    frontend_latency = 3
-    forward_latency = 4
-    response_latency = 2
-    snoop_response_latency = 4
+    def connectCachedPorts(self, bus):
+        for p in self._cached_ports:
+            exec('self.%s = bus.slave' % p)
 
-    # Use a snoop-filter by default
-    snoop_filter = SnoopFilter(lookup_latency = 1)
+    def connectUncachedPorts(self, bus):
+        for p in self._uncached_slave_ports:
+            exec('self.%s = bus.master' % p)
+        for p in self._uncached_master_ports:
+            exec('self.%s = bus.slave' % p)
 
-    # This specialisation of the coherent crossbar is to be considered
-    # the point of coherency, as there are no (coherent) downstream
-    # caches.
-    point_of_coherency = True
+    def connectAllPorts(self, cached_bus, uncached_bus = None):
+        self.connectCachedPorts(cached_bus)
+        if not uncached_bus:
+            uncached_bus = cached_bus
+        self.connectUncachedPorts(uncached_bus)
 
-    # This specialisation of the coherent crossbar is to be considered
-    # the point of unification, it connects the dcache and the icache
-    # to the first level of unified cache. This is needed for systems
-    # without caches where the SystemXBar is also the point of
-    # unification.
-    point_of_unification = True
+    def addPrivateSplitL1Caches(self, ic, dc, iwc = None, dwc = None):
+        self.icache = ic
+        self.dcache = dc
+        self.icache_port = ic.cpu_side
+        self.dcache_port = dc.cpu_side
+        self._cached_ports = ['icache.mem_side', 'dcache.mem_side']
+        if buildEnv['TARGET_ISA'] in ['x86', 'arm']:
+            if iwc and dwc:
+                self.itb_walker_cache = iwc
+                self.dtb_walker_cache = dwc
+                self.itb.walker.port = iwc.cpu_side
+                self.dtb.walker.port = dwc.cpu_side
+                self._cached_ports += ["itb_walker_cache.mem_side", \
+                                       "dtb_walker_cache.mem_side"]
+            else:
+                self._cached_ports += ["itb.walker.port", "dtb.walker.port"]
 
-# In addition to the system interconnect, we typically also have one
-# or more on-chip I/O crossbars. Note that at some point we might want
-# to also define an off-chip I/O crossbar such as PCIe.
-class IOXBar(NoncoherentXBar):
-    # 128-bit crossbar by default
-    width = 16
+            # Checker doesn't need its own tlb caches because it does
+            # functional accesses only
+            if self.checker != NULL:
+                self._cached_ports += ["checker.itb.walker.port", \
+                                       "checker.dtb.walker.port"]
 
-    # Assume a simpler datapath than a coherent crossbar, incuring
-    # less pipeline stages for decision making and forwarding of
-    # requests.
-    frontend_latency = 2
-    forward_latency = 1
-    response_latency = 2
+    def addTwoLevelCacheHierarchy(self, ic, dc, l2c, iwc=None, dwc=None,
+                                  xbar=None):
+        self.addPrivateSplitL1Caches(ic, dc, iwc, dwc)
+        self.toL2Bus = xbar if xbar else L2XBar()
+        self.connectCachedPorts(self.toL2Bus)
+        self.l2cache = l2c
+        self.toL2Bus.master = self.l2cache.cpu_side
+        self._cached_ports = ['l2cache.mem_side']
+
+    def addThreeLevelCacheHierarchy(self, ic, dc, l3c, iwc=None, dwc=None,
+                                  xbar=None):
+        self.addPrivateSplitL1Caches(ic, dc, iwc, dwc)
+        self.toL3Bus = xbar if xbar else L3XBar()
+        self.connectCachedPorts(self.toL3Bus)
+        self.l3cache = l3c
+        self.toL3Bus.master = self.l3cache.cpu_side
+        self._cached_ports = ['l3cache.mem_side']
+
+    def createThreads(self):
+        # If no ISAs have been created, assume that the user wants the
+        # default ISA.
+        if len(self.isa) == 0:
+            self.isa = [ default_isa_class() for i in xrange(self.numThreads) ]
+        else:
+            if len(self.isa) != int(self.numThreads):
+                raise RuntimeError("Number of ISA instances doesn't "
+                                   "match thread count")
+        if self.checker != NULL:
+            self.checker.createThreads()
+
+    def addCheckerCpu(self):
+        pass
+
+    def createPhandleKey(self, thread):
+        # This method creates a unique key for this cpu as a function of a
+        # certain thread
+        return 'CPU-%d-%d-%d' % (self.socket_id, self.cpu_id, thread)
+
+    #Generate simple CPU Device Tree structure
+    def generateDeviceTree(self, state):
+        """Generate cpu nodes for each thread and the corresponding part of the
+        cpu-map node. Note that this implementation does not support clusters
+        of clusters. Note that GEM5 is not compatible with the official way of
+        numbering cores as defined in the Device Tree documentation. Where the
+        cpu_id needs to reset to 0 for each cluster by specification, GEM5
+        expects the cpu_id to be globally unique and incremental. This
+        generated node adheres the GEM5 way of doing things."""
+        if bool(self.switched_out):
+            return
+
+        cpus_node = FdtNode('cpus')
+        cpus_node.append(state.CPUCellsProperty())
+        #Special size override of 0
+        cpus_node.append(FdtPropertyWords('#size-cells', [0]))
+
+        # Generate cpu nodes
+        for i in range(int(self.numThreads)):
+            reg = (int(self.socket_id)<<8) + int(self.cpu_id) + i
+            node = FdtNode("cpu@%x" % reg)
+            node.append(FdtPropertyStrings("device_type", "cpu"))
+            node.appendCompatible(["gem5,arm-cpu"])
+            node.append(FdtPropertyWords("reg", state.CPUAddrCells(reg)))
+            platform, found = self.system.unproxy(self).find_any(Platform)
+            if found:
+                platform.annotateCpuDeviceNode(node, state)
+            else:
+                warn("Platform not found for device tree generation; " \
+                     "system or multiple CPUs may not start")
+
+            freq = round(self.clk_domain.unproxy(self).clock[0].frequency)
+            node.append(FdtPropertyWords("clock-frequency", freq))
+
+            # Unique key for this CPU
+            phandle_key = self.createPhandleKey(i)
+            node.appendPhandle(phandle_key)
+            cpus_node.append(node)
+
+        yield cpus_node
