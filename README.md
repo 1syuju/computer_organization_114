@@ -3,6 +3,9 @@
 ./build/X86/gem5.opt configs/example/se.py -c tests/test-progs/hello/bin/x86/linux/hello --cpu-type=TimingSimpleCPU --caches --l2cache --mem-type=NVMainMemory --nvmain-config=../NVMain/Config/PCM_ISSCC_2012_4GB.config
 
 ## Q3
+
+> ./build/X86/gem5.opt configs/example/se.py -c ./quicksort --cpu-type=TimingSimpleCPU --caches --l2cache --l3cache --l3_assoc=? --l1i_size=32kB --l1d_size=32kB --l2_size=128kB --l3_size=128kB --mem-type=NVMainMemory --nvmain-config=../NVMain/Config/PCM_ISSCC_2012_4GB.config
+
 ### 2way
 system.l3.overall_miss_rate::total           0.854746   
 ```
