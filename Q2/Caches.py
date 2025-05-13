@@ -72,7 +72,7 @@ class L2Cache(Cache):
     tgts_per_mshr = 12
     write_buffers = 8
 
-class L2Cache(Cache):
+class L3Cache(Cache):
     assoc = 8
     tag_latency = 20
     data_latency = 20
@@ -91,6 +91,7 @@ class IOCache(Cache):
     mshrs = 20
     size = '1kB'
     tgts_per_mshr = 12
+
 
 class PageTableWalkerCache(Cache):
     assoc = 2
