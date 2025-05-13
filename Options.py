@@ -98,6 +98,7 @@ def addNoISAOptions(parser):
                       help="use external port for SystemC TLM cosimulation")
     parser.add_option("--caches", action="store_true")
     parser.add_option("--l2cache", action="store_true")
+    parser.add_option("--l3cache", action="store_true")
     parser.add_option("--num-dirs", type="int", default=1)
     parser.add_option("--num-l2caches", type="int", default=1)
     parser.add_option("--num-l3caches", type="int", default=1)
@@ -130,7 +131,10 @@ def addNoISAOptions(parser):
 def addCommonOptions(parser):
     # start by adding the base options that do not assume an ISA
     addNoISAOptions(parser)
-
+    for arg in sys.argv:
+        if arg[:9] == "--nvmain":
+            parser.add_option(arg, type="string", default="NULL", \
+                help="Set NVMain configuration value for a parameter")
     # system options
     parser.add_option("--list-cpu-types",
                       action="callback", callback=_listCpuTypes,
