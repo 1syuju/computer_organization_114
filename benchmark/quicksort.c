@@ -1,4 +1,5 @@
-
+#include<stdio.h>
+#include<stdlib.h>
 #define SWAP(x,y) {int t; t = x; x = y; y = t;} 
 
 
