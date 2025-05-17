@@ -11,29 +11,37 @@
 
 ### 2way
 system.l3.overall_miss_rate::total           0.682357                       # miss rate for overall accesses
-```
-    assoc = 2
-    tag_latency = 20
-    data_latency = 20
-    response_latency = 20
-    mshrs = 20
-    tgts_per_mshr = 12
-    write_buffers = 8
-    replacement_policy = \
-    Param.BaseReplacementPolicy(LFURP(),"Replacement policy")
+
+```python=
+assoc = 2
+tag_latency = 20
+data_latency = 20
+response_latency = 20
+mshrs = 20
+tgts_per_mshr = 12
+write_buffers = 8
+replacement_policy = \
+Param.BaseReplacementPolicy(LFURP(),"Replacement policy")
 ```
 
 ### fullway
 system.l3.overall_miss_rate::total           0.726195                       # miss rate for overall accesses 
+
+```python=
+assoc = 2048
+tag_latency = 20
+data_latency = 20
+response_latency = 20
+mshrs = 20
+tgts_per_mshr = 12
+write_buffers = 8
+replacement_policy = \
+Param.BaseReplacementPolicy(LFURP(),"Replacement policy")
 ```
-    assoc = 2048
-    tag_latency = 20
-    data_latency = 20
-    response_latency = 20
-    mshrs = 20
-    tgts_per_mshr = 12
-    write_buffers = 8
-    replacement_policy = \
-    Param.BaseReplacementPolicy(LFURP(),"Replacement policy")
-```
+
+### discuss
+the total miss rate of 2-way is lower than the total miss rate of fullway
+
+## Q4
+
 
