@@ -4,11 +4,11 @@ sim_seconds                                  0.092502                       # Nu
 sim_ticks                                 92502332500                       # Number of ticks simulated
 final_tick                                92502332500                       # Number of ticks from beginning of simulation (restored from checkpoints and never reset)
 sim_freq                                 1000000000000                       # Frequency of simulated ticks
-host_inst_rate                                1033198                       # Simulator instruction rate (inst/s)
-host_op_rate                                  1706102                       # Simulator op (including micro ops) rate (op/s)
-host_tick_rate                             2139652243                       # Simulator tick rate (ticks/s)
+host_inst_rate                                 996417                       # Simulator instruction rate (inst/s)
+host_op_rate                                  1645368                       # Simulator op (including micro ops) rate (op/s)
+host_tick_rate                             2063483822                       # Simulator tick rate (ticks/s)
 host_mem_usage                                 670936                       # Number of bytes of host memory used
-host_seconds                                    43.23                       # Real time elapsed on the host
+host_seconds                                    44.83                       # Real time elapsed on the host
 sim_insts                                    44667607                       # Number of instructions simulated
 sim_ops                                      73758908                       # Number of ops (including micro ops) simulated
 system.voltage_domain.voltage                       1                       # Voltage in Volts
@@ -259,7 +259,7 @@ system.cpu.icache.tags.occ_task_id_blocks::1024          450                    
 system.cpu.icache.tags.age_task_id_blocks_1024::0           21                       # Occupied blocks per task id
 system.cpu.icache.tags.age_task_id_blocks_1024::1           39                       # Occupied blocks per task id
 system.cpu.icache.tags.age_task_id_blocks_1024::4          390                       # Occupied blocks per task id
-system.cpu.icache.tags.occ_task_id_percent::1024     0.878906   a                    # Percentage of cache occupancy per task id
+system.cpu.icache.tags.occ_task_id_percent::1024     0.878906                       # Percentage of cache occupancy per task id
 system.cpu.icache.tags.tag_accesses         119057819                       # Number of tag accesses
 system.cpu.icache.tags.data_accesses        119057819                       # Number of data accesses
 system.cpu.icache.pwrStateResidencyTicks::UNDEFINED  92502332500                       # Cumulative time (in ticks) in various power states
