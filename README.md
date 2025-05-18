@@ -59,8 +59,8 @@ class L3Cache(Cache):
 ```
 
 
-### previos
+### previos (LRU)
 system.l3.replacements                          25313  
 
-### modified
+### modified (LFU)
 system.l3.replacements                          25313  
