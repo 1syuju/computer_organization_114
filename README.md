@@ -60,7 +60,7 @@ class L3Cache(Cache):
 
 
 ### previos (LRU)
-system.l3.replacements                          25313  
+system.l3.replacements                          19364 
 
 ### modified (LFU)
 system.l3.replacements                          25313  
