@@ -59,5 +59,7 @@ class L3Cache(Cache):
 ```
 
 
-### modified:
+### previos
 system.l3.replacements                          25313  
+
+### modified
