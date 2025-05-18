@@ -43,5 +43,18 @@ Param.BaseReplacementPolicy(LFURP(),"Replacement policy")
 the total miss rate of 2-way is lower than the total miss rate of fullway
 
 ## Q4
+### Caches.py
 
+'''python=
+class L3Cache(Cache):
+    assoc = 8
+    tag_latency = 20
+    data_latency = 20
+    response_latency = 20
+    mshrs = 20
+    tgts_per_mshr = 12
+    write_buffers = 8
+    replacement_policy = \
+    Param.BaseReplacementPolicy(LFURP(),"Replacement policy")
+'''
 
