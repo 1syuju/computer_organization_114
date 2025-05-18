@@ -45,7 +45,7 @@ the total miss rate of 2-way is lower than the total miss rate of fullway
 ## Q4
 ### Caches.py
 
-'''python=
+```python=
 class L3Cache(Cache):
     assoc = 8
     tag_latency = 20
@@ -56,5 +56,5 @@ class L3Cache(Cache):
     write_buffers = 8
     replacement_policy = \
     Param.BaseReplacementPolicy(LFURP(),"Replacement policy")
-'''
+```
 
