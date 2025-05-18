@@ -51,11 +51,11 @@ class LFURP : public BaseReplacementPolicy
     {
         /** Number of references to this entry since it was reset. */
         unsigned refCount;
-
+	Tick lastTouchTick;
         /**
          * Default constructor. Invalidate data.
          */
-        LFUReplData() : refCount(0) {}
+        LFUReplData() : refCount(0) lastTouchTick(0){}
     };
 
   public:

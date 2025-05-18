@@ -28,45 +28,49 @@
  * Authors: Daniel Carvalho
  */
 
-#include "mem/cache/replacement_policies/lru_rp.hh"
+#include "mem/cache/replacement_policies/lfu_rp.hh"
 
 #include <cassert>
 #include <memory>
 
-#include "params/LRURP.hh"
+#include "params/LFURP.hh"
 
-LRURP::LRURP(const Params *p)
+LFURP::LFURP(const Params *p)
     : BaseReplacementPolicy(p)
 {
 }
-
+//Resets both refCount and lastTouchTick to 0.
 void
-LRURP::invalidate(const std::shared_ptr<ReplacementData>& replacement_data)
+LFURP::invalidate(const std::shared_ptr<ReplacementData>& replacement_data)
 const
 {
-    // Reset last touch timestamp
-    std::static_pointer_cast<LRUReplData>(
+    // Reset reference count
+    std::static_pointer_cast<LFUReplData>(replacement_data)->refCount = 0;
+    std::static_pointer_cast<LFUReplData>(
         replacement_data)->lastTouchTick = Tick(0);
 }
-
+//Increments refCount and updates lastTouchTick to the current tick (curTick()).
 void
-LRURP::touch(const std::shared_ptr<ReplacementData>& replacement_data) const
+LFURP::touch(const std::shared_ptr<ReplacementData>& replacement_data) const
 {
+    // Update reference count
+    std::static_pointer_cast<LFUReplData>(replacement_data)->refCount++;
     // Update last touch timestamp
-    std::static_pointer_cast<LRUReplData>(
+    std::static_pointer_cast<LFUReplData>(
         replacement_data)->lastTouchTick = curTick();
 }
-
+//Resets refCount to 1 and updates lastTouchTick to the current tick (curTick()).
 void
-LRURP::reset(const std::shared_ptr<ReplacementData>& replacement_data) const
+LFURP::reset(const std::shared_ptr<ReplacementData>& replacement_data) const
 {
-    // Set last touch timestamp
-    std::static_pointer_cast<LRUReplData>(
+    // Reset reference count
+    std::static_pointer_cast<LFUReplData>(replacement_data)->refCount = 1;
+    std::static_pointer_cast<LFUReplData>(
         replacement_data)->lastTouchTick = curTick();
 }
-
+//If multiple candidates have the same refCount, it selects the one with the smallest lastTouchTick (i.e., the least recently accessed).
 ReplaceableEntry*
-LRURP::getVictim(const ReplacementCandidates& candidates) const
+LFURP::getVictim(const ReplacementCandidates& candidates) const
 {
     // There must be at least one replacement candidate
     assert(candidates.size() > 0);
@@ -75,10 +79,62 @@ LRURP::getVictim(const ReplacementCandidates& candidates) const
     ReplaceableEntry* victim = candidates[0];
     for (const auto& candidate : candidates) {
         // Update victim entry if necessary
-        if (std::static_pointer_cast<LRUReplData>(
+        if (std::static_pointer_cast<LFUReplData>(
+                    candidate->replacementData)->refCount <
+                std::static_pointer_cast<LFUReplData>(
+                    victim->replacementData)->refCount) {
+            victim = candidate;
+        }
+        else if(std::static_pointer_cast<LFUReplData>(
+                    candidate->replacementData)->refCount ==
+                std::static_pointer_cast<LFUReplData>(
+                    victim->replacementData)->refCount){
+            if(std::static_pointer_cast<LFUReplData>(
                     candidate->replacementData)->lastTouchTick <
-                std::static_pointer_cast<LRUReplData>(
-                    victim->replacementData)->lastTouchTick) {
+                std::static_pointer_cast<LFUReplData>(
+                    victim->replacementData)->lastTouchTick){
+                victim = candidate;
+            }
+        }
+    }
+
+    return victim;
+}
+
+std::shared_ptr<ReplacementData>
+LFURP::instantiateEntry()
+{
+    return std::shared_ptr<ReplacementData>(new LFUReplData());
+}
+
+LFURP*
+LFURPParams::create()
+{
+    return new LFURP(this);
+}
+
+
+void
+LFURP::reset(const std::shared_ptr<ReplacementData>& replacement_data) const
+{
+    // Reset reference count
+    std::static_pointer_cast<LFUReplData>(replacement_data)->refCount = 1;
+}
+
+ReplaceableEntry*
+LFURP::getVictim(const ReplacementCandidates& candidates) const
+{
+    // There must be at least one replacement candidate
+    assert(candidates.size() > 0);
+
+    // Visit all candidates to find victim
+    ReplaceableEntry* victim = candidates[0];
+    for (const auto& candidate : candidates) {
+        // Update victim entry if necessary
+        if (std::static_pointer_cast<LFUReplData>(
+                    candidate->replacementData)->refCount <
+                std::static_pointer_cast<LFUReplData>(
+                    victim->replacementData)->refCount) {
             victim = candidate;
         }
     }
@@ -87,13 +143,13 @@ LRURP::getVictim(const ReplacementCandidates& candidates) const
 }
 
 std::shared_ptr<ReplacementData>
-LRURP::instantiateEntry()
+LFURP::instantiateEntry()
 {
-    return std::shared_ptr<ReplacementData>(new LRUReplData());
+    return std::shared_ptr<ReplacementData>(new LFUReplData());
 }
 
-LRURP*
-LRURPParams::create()
+LFURP*
+LFURPParams::create()
 {
-    return new LRURP(this);
+    return new LFURP(this);
 }
