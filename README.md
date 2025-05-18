@@ -60,4 +60,4 @@ class L3Cache(Cache):
 
 
 ### modified:
-system.l3.replacements                          25313 
+system.l3.replacements                          25313  
