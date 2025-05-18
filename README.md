@@ -58,3 +58,5 @@ class L3Cache(Cache):
     Param.BaseReplacementPolicy(LFURP(),"Replacement policy")
 ```
 
+modified:
+``` system.l3.replacements                          25313 ```
