@@ -60,6 +60,7 @@ class L3Cache(Cache):
 
 
 ### previos
-system.l3.replacements                          25313  
+system.l3.replacements                          19364                       # number of replacements
 
 ### modified
+system.l3.replacements                          25313  
