@@ -1,11 +1,11 @@
-./build/X86/gem5.opt configs/example/se.py -c ./quicksort --cpu-type=TimingSimpleCPU --caches --l2cache --l3cache --l3_assoc=2 --l1i_size=32kB --l1d_size=32kB --l2_size=128kB --l3_size=1MB --mem-type=NVMainMemory --nvmain-config=../NVMain/Config/PCM_ISSCC_2012_4GB.config
+./build/X86/gem5.opt configs/example/se.py -c ./quicksort --cpu-type=TimingSimpleCPU --caches --l2cache --l3cache --l3_assoc=2 --l1i_size=32kB --l1d_size=32kB --l2_size=128kB --l3_size=32MB --mem-type=NVMainMemory --nvmain-config=../NVMain/Config/PCM_ISSCC_2012_4GB.config
 gem5 Simulator System.  http://gem5.org
 gem5 is copyrighted software; use the --copyright option for details.
 
 gem5 compiled May 18 2025 16:13:27
-gem5 started Jun 11 2025 23:28:22
-gem5 executing on ubuntu18, pid 25126
-command line: ./build/X86/gem5.opt configs/example/se.py -c ./quicksort --cpu-type=TimingSimpleCPU --caches --l2cache --l3cache --l3_assoc=2 --l1i_size=32kB --l1d_size=32kB --l2_size=128kB --l3_size=1MB --mem-type=NVMainMemory --nvmain-config=../NVMain/Config/PCM_ISSCC_2012_4GB.config
+gem5 started Jun 11 2025 23:59:06
+gem5 executing on ubuntu18, pid 25225
+command line: ./build/X86/gem5.opt configs/example/se.py -c ./quicksort --cpu-type=TimingSimpleCPU --caches --l2cache --l3cache --l3_assoc=2 --l1i_size=32kB --l1d_size=32kB --l2_size=128kB --l3_size=32MB --mem-type=NVMainMemory --nvmain-config=../NVMain/Config/PCM_ISSCC_2012_4GB.config
 
 Global frequency set at 1000000000000 ticks per second
 NVMainControl: Reading NVMain config file: ../NVMain/Config/PCM_ISSCC_2012_4GB.config.
