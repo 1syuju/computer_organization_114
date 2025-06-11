@@ -39,8 +39,6 @@ replacement_policy = \
 Param.BaseReplacementPolicy(LFURP(),"Replacement policy")
 ```
 
-### discuss
-the total miss rate of 2-way is lower than the total miss rate of fullway
 
 ## Q4
 ### Caches.py
