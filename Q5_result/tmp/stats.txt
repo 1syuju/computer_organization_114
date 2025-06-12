@@ -4,11 +4,11 @@ sim_seconds                                  0.017642                       # Nu
 sim_ticks                                 17641636500                       # Number of ticks simulated
 final_tick                                17641636500                       # Number of ticks from beginning of simulation (restored from checkpoints and never reset)
 sim_freq                                 1000000000000                       # Frequency of simulated ticks
-host_inst_rate                                 959933                       # Simulator instruction rate (inst/s)
-host_op_rate                                  2068274                       # Simulator op (including micro ops) rate (op/s)
-host_tick_rate                             1711325994                       # Simulator tick rate (ticks/s)
-host_mem_usage                                 662904                       # Number of bytes of host memory used
-host_seconds                                    10.31                       # Real time elapsed on the host
+host_inst_rate                                 984717                       # Simulator instruction rate (inst/s)
+host_op_rate                                  2121673                       # Simulator op (including micro ops) rate (op/s)
+host_tick_rate                             1755509672                       # Simulator tick rate (ticks/s)
+host_mem_usage                                 659068                       # Number of bytes of host memory used
+host_seconds                                    10.05                       # Real time elapsed on the host
 sim_insts                                     9895701                       # Number of instructions simulated
 sim_ops                                      21321310                       # Number of ops (including micro ops) simulated
 system.voltage_domain.voltage                       1                       # Voltage in Volts
@@ -487,22 +487,22 @@ system.l2.overall_avg_mshr_miss_latency::cpu.data 164241.784038                 
 system.l2.overall_avg_mshr_miss_latency::total 151033.035714                       # average overall mshr miss latency
 system.l2.replacements                              0                       # number of replacements
 system.l3.tags.pwrStateResidencyTicks::UNDEFINED  17641636500                       # Cumulative time (in ticks) in various power states
-system.l3.tags.tagsinuse                   508.651655                       # Cycle average of tags in use
+system.l3.tags.tagsinuse                   371.168370                       # Cycle average of tags in use
 system.l3.tags.total_refs                         560                       # Total number of references to valid blocks.
 system.l3.tags.sampled_refs                       560                       # Sample count of references to valid blocks.
 system.l3.tags.avg_refs                             1                       # Average number of references to valid blocks.
 system.l3.tags.warmup_cycle                    418000                       # Cycle when the warmup percentage was hit.
-system.l3.tags.occ_blocks::cpu.inst        310.134997                       # Average occupied blocks per requestor
-system.l3.tags.occ_blocks::cpu.data        198.516657                       # Average occupied blocks per requestor
-system.l3.tags.occ_percent::cpu.inst         0.018929                       # Average percentage of cache occupancy
-system.l3.tags.occ_percent::cpu.data         0.012116                       # Average percentage of cache occupancy
-system.l3.tags.occ_percent::total            0.031046                       # Average percentage of cache occupancy
-system.l3.tags.occ_task_id_blocks::1024           560                       # Occupied blocks per task id
+system.l3.tags.occ_blocks::cpu.inst        235.416645                       # Average occupied blocks per requestor
+system.l3.tags.occ_blocks::cpu.data        135.751725                       # Average occupied blocks per requestor
+system.l3.tags.occ_percent::cpu.inst         0.459798                       # Average percentage of cache occupancy
+system.l3.tags.occ_percent::cpu.data         0.265140                       # Average percentage of cache occupancy
+system.l3.tags.occ_percent::total            0.724938                       # Average percentage of cache occupancy
+system.l3.tags.occ_task_id_blocks::1024           398                       # Occupied blocks per task id
 system.l3.tags.age_task_id_blocks_1024::0           50                       # Occupied blocks per task id
-system.l3.tags.age_task_id_blocks_1024::4          510                       # Occupied blocks per task id
-system.l3.tags.occ_task_id_percent::1024     0.034180                       # Percentage of cache occupancy per task id
-system.l3.tags.tag_accesses                      9520                       # Number of tag accesses
-system.l3.tags.data_accesses                     9520                       # Number of data accesses
+system.l3.tags.age_task_id_blocks_1024::4          348                       # Occupied blocks per task id
+system.l3.tags.occ_task_id_percent::1024     0.777344                       # Percentage of cache occupancy per task id
+system.l3.tags.tag_accesses                      1680                       # Number of tag accesses
+system.l3.tags.data_accesses                     1680                       # Number of data accesses
 system.l3.pwrStateResidencyTicks::UNDEFINED  17641636500                       # Cumulative time (in ticks) in various power states
 system.l3.ReadExReq_misses::cpu.data              115                       # number of ReadExReq misses
 system.l3.ReadExReq_misses::total                 115                       # number of ReadExReq misses
@@ -609,7 +609,7 @@ system.l3.demand_avg_mshr_miss_latency::total 128533.035714                     
 system.l3.overall_avg_mshr_miss_latency::cpu.inst 120425.072046                       # average overall mshr miss latency
 system.l3.overall_avg_mshr_miss_latency::cpu.data 141741.784038                       # average overall mshr miss latency
 system.l3.overall_avg_mshr_miss_latency::total 128533.035714                       # average overall mshr miss latency
-system.l3.replacements                              0                       # number of replacements
+system.l3.replacements                            162                       # number of replacements
 system.membus.snoop_filter.tot_requests           560                       # Total number of requests made to the snoop filter.
 system.membus.snoop_filter.hit_single_requests            0                       # Number of requests hitting in the snoop filter with a single holder of the requested data.
 system.membus.snoop_filter.hit_multi_requests            0                       # Number of requests hitting in the snoop filter with multiple (>1) holders of the requested data.
@@ -646,14 +646,14 @@ system.membus.respLayer1.utilization              0.0                       # La
 system.tol2bus.snoop_filter.tot_requests          637                       # Total number of requests made to the snoop filter.
 system.tol2bus.snoop_filter.hit_single_requests           68                       # Number of requests hitting in the snoop filter with a single holder of the requested data.
 system.tol2bus.snoop_filter.hit_multi_requests            0                       # Number of requests hitting in the snoop filter with multiple (>1) holders of the requested data.
-system.tol2bus.snoop_filter.tot_snoops              0                       # Total number of snoops made to the snoop filter.
-system.tol2bus.snoop_filter.hit_single_snoops            0                       # Number of snoops hitting in the snoop filter with a single holder of the requested data.
+system.tol2bus.snoop_filter.tot_snoops            161                       # Total number of snoops made to the snoop filter.
+system.tol2bus.snoop_filter.hit_single_snoops          161                       # Number of snoops hitting in the snoop filter with a single holder of the requested data.
 system.tol2bus.snoop_filter.hit_multi_snoops            0                       # Number of snoops hitting in the snoop filter with multiple (>1) holders of the requested data.
 system.tol2bus.pwrStateResidencyTicks::UNDEFINED  17641636500                       # Cumulative time (in ticks) in various power states
 system.tol2bus.trans_dist::ReadResp               452                       # Transaction distribution
 system.tol2bus.trans_dist::WritebackDirty           14                       # Transaction distribution
 system.tol2bus.trans_dist::WritebackClean           43                       # Transaction distribution
-system.tol2bus.trans_dist::CleanEvict              11                       # Transaction distribution
+system.tol2bus.trans_dist::CleanEvict             173                       # Transaction distribution
 system.tol2bus.trans_dist::ReadExReq              117                       # Transaction distribution
 system.tol2bus.trans_dist::ReadExResp             117                       # Transaction distribution
 system.tol2bus.trans_dist::ReadCleanReq           347                       # Transaction distribution
@@ -664,21 +664,21 @@ system.tol2bus.pkt_count::total                  1206                       # Pa
 system.tol2bus.pkt_size_system.cpu.icache.mem_side::system.l2.cpu_side        24960                       # Cumulative packet size per connected master and slave (bytes)
 system.tol2bus.pkt_size_system.cpu.dcache.mem_side::system.l2.cpu_side        15104                       # Cumulative packet size per connected master and slave (bytes)
 system.tol2bus.pkt_size::total                  40064                       # Cumulative packet size per connected master and slave (bytes)
-system.tol2bus.snoops                               0                       # Total snoops (count)
+system.tol2bus.snoops                             162                       # Total snoops (count)
 system.tol2bus.snoopTraffic                         0                       # Total snoop traffic (bytes)
-system.tol2bus.snoop_fanout::samples              569                       # Request fanout histogram
-system.tol2bus.snoop_fanout::mean                   0                       # Request fanout histogram
-system.tol2bus.snoop_fanout::stdev                  0                       # Request fanout histogram
+system.tol2bus.snoop_fanout::samples              731                       # Request fanout histogram
+system.tol2bus.snoop_fanout::mean            0.220246                       # Request fanout histogram
+system.tol2bus.snoop_fanout::stdev           0.414696                       # Request fanout histogram
 system.tol2bus.snoop_fanout::underflows             0      0.00%      0.00% # Request fanout histogram
-system.tol2bus.snoop_fanout::0                    569    100.00%    100.00% # Request fanout histogram
-system.tol2bus.snoop_fanout::1                      0      0.00%    100.00% # Request fanout histogram
+system.tol2bus.snoop_fanout::0                    570     77.98%     77.98% # Request fanout histogram
+system.tol2bus.snoop_fanout::1                    161     22.02%    100.00% # Request fanout histogram
 system.tol2bus.snoop_fanout::2                      0      0.00%    100.00% # Request fanout histogram
 system.tol2bus.snoop_fanout::3                      0      0.00%    100.00% # Request fanout histogram
 system.tol2bus.snoop_fanout::4                      0      0.00%    100.00% # Request fanout histogram
 system.tol2bus.snoop_fanout::overflows              0      0.00%    100.00% # Request fanout histogram
 system.tol2bus.snoop_fanout::min_value              0                       # Request fanout histogram
-system.tol2bus.snoop_fanout::max_value              0                       # Request fanout histogram
-system.tol2bus.snoop_fanout::total                569                       # Request fanout histogram
+system.tol2bus.snoop_fanout::max_value              1                       # Request fanout histogram
+system.tol2bus.snoop_fanout::total                731                       # Request fanout histogram
 system.tol2bus.reqLayer0.occupancy             375500                       # Layer occupancy (ticks)
 system.tol2bus.reqLayer0.utilization              0.0                       # Layer utilization (%)
 system.tol2bus.respLayer0.occupancy            520500                       # Layer occupancy (ticks)
@@ -687,23 +687,24 @@ system.tol2bus.respLayer1.occupancy            333000                       # La
 system.tol2bus.respLayer1.utilization             0.0                       # Layer utilization (%)
 system.tol3bus.pwrStateResidencyTicks::UNDEFINED  17641636500                       # Cumulative time (in ticks) in various power states
 system.tol3bus.trans_dist::ReadResp               445                       # Transaction distribution
+system.tol3bus.trans_dist::CleanEvict             162                       # Transaction distribution
 system.tol3bus.trans_dist::ReadExReq              115                       # Transaction distribution
 system.tol3bus.trans_dist::ReadExResp             115                       # Transaction distribution
 system.tol3bus.trans_dist::ReadSharedReq          445                       # Transaction distribution
 system.tol3bus.pkt_count_system.l2.mem_side::system.l3.cpu_side         1120                       # Packet count per connected master and slave (bytes)
 system.tol3bus.pkt_size_system.l2.mem_side::system.l3.cpu_side        35840                       # Cumulative packet size per connected master and slave (bytes)
-system.tol3bus.snoops                               0                       # Total snoops (count)
+system.tol3bus.snoops                             162                       # Total snoops (count)
 system.tol3bus.snoopTraffic                         0                       # Total snoop traffic (bytes)
-system.tol3bus.snoop_fanout::samples              560                       # Request fanout histogram
-system.tol3bus.snoop_fanout::mean                   0                       # Request fanout histogram
-system.tol3bus.snoop_fanout::stdev                  0                       # Request fanout histogram
+system.tol3bus.snoop_fanout::samples              722                       # Request fanout histogram
+system.tol3bus.snoop_fanout::mean            0.224377                       # Request fanout histogram
+system.tol3bus.snoop_fanout::stdev           0.417460                       # Request fanout histogram
 system.tol3bus.snoop_fanout::underflows             0      0.00%      0.00% # Request fanout histogram
-system.tol3bus.snoop_fanout::0                    560    100.00%    100.00% # Request fanout histogram
-system.tol3bus.snoop_fanout::1                      0      0.00%    100.00% # Request fanout histogram
+system.tol3bus.snoop_fanout::0                    560     77.56%     77.56% # Request fanout histogram
+system.tol3bus.snoop_fanout::1                    162     22.44%    100.00% # Request fanout histogram
 system.tol3bus.snoop_fanout::overflows              0      0.00%    100.00% # Request fanout histogram
 system.tol3bus.snoop_fanout::min_value              0                       # Request fanout histogram
-system.tol3bus.snoop_fanout::max_value              0                       # Request fanout histogram
-system.tol3bus.snoop_fanout::total                560                       # Request fanout histogram
+system.tol3bus.snoop_fanout::max_value              1                       # Request fanout histogram
+system.tol3bus.snoop_fanout::total                722                       # Request fanout histogram
 system.tol3bus.reqLayer0.occupancy             280000                       # Layer occupancy (ticks)
 system.tol3bus.reqLayer0.utilization              0.0                       # Layer utilization (%)
 system.tol3bus.respLayer0.occupancy            560000                       # Layer occupancy (ticks)
