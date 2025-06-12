@@ -1,15 +1,13 @@
-./build/X86/gem5.opt configs/example/se.py -c ./multiply --cpu-type=TimingSimpleCPU --caches --l2cache --l3cache --l1i_size=32kB --l1d_size=32kB --l2_size=128kB --l3_size=1MB --mem-type=NVMainMemory --nvmain-config=../NVMain/Config/PCM_ISSCC_2012_4GB.config
 gem5 Simulator System.  http://gem5.org
 gem5 is copyrighted software; use the --copyright option for details.
 
 gem5 compiled May 18 2025 16:13:27
-gem5 started Jun 12 2025 01:45:06
-gem5 executing on ubuntu18, pid 26669
-command line: ./build/X86/gem5.opt configs/example/se.py -c ./multiply --cpu-type=TimingSimpleCPU --caches --l2cache --l3cache --l1i_size=32kB --l1d_size=32kB --l2_size=128kB --l3_size=1MB --mem-type=NVMainMemory --nvmain-config=../NVMain/Config/PCM_ISSCC_2012_4GB.config
+gem5 started Jun 12 2025 13:06:26
+gem5 executing on ubuntu18, pid 27334
+command line: ./build/X86/gem5.opt configs/example/se.py -c ./multiply --cpu-type=TimingSimpleCPU --caches --l2cache --l3cache --l3_assoc=2 --l1i_size=32kB --l1d_size=32kB --l2_size=128kB --l3_size=32kB --mem-type=NVMainMemory --nvmain-config=../NVMain/Config/PCM_ISSCC_2012_4GB.config
 
 Global frequency set at 1000000000000 ticks per second
 NVMainControl: Reading NVMain config file: ../NVMain/Config/PCM_ISSCC_2012_4GB.config.
-0: system.remote_gdb: listening for remote gdb on port 7000
 NVMain: GlobalEventQueue: Added a memory subsystem running at 400MHz. My frequency is 2000MHz.
 Config: Warning: Key EIDD0 is not set. Using '85' as the default. Please configure this value if this is wrong.
 Config: Warning: Key EIDD1 is not set. Using '54' as the default. Please configure this value if this is wrong.
@@ -126,11 +124,6 @@ NVMain: the address mapping order is
 defaultMemory.channel0.FRFCFS-WQF capacity is 4096 MB.
 Creating 4 command queues.
 **** REAL SIMULATION ****
-info: Entering event queue @ 0.  Starting simulation...
-warn: readlink() called on '/proc/self/exe' may yield unexpected results in various settings.
-      Returning '/home/huang/gem5-525ce650e1a5bbe71c39d4b15598d6c003cc9f9e/multiply'
-info: Increasing stack size by one page.
-warn: ignoring syscall access(...)
 Exiting @ tick 17641636500 because exiting with last active thread context
 i0.defaultMemory.channel0.FRFCFS-WQF.channel0.rank0.bank0.subarray0.subArrayEnergy 6.93595nJ
 i0.defaultMemory.channel0.FRFCFS-WQF.channel0.rank0.bank0.subarray0.activeEnergy 6.5772nJ
